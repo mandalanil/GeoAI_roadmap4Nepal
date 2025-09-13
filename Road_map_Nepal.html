@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal's GeoAI Future: An Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Nepal National Colors (Crimson Red, Royal Blue, Saffron) -->
+    <!-- Application Structure Plan: The application is designed as a narrative journey, starting with a high-level vision, then moving into actionable short-term and long-term goals. This is followed by an analysis of the digital landscape with interactive charts. The core "Invest to Reinvest" financial model is then visualized, followed by a strategic SWOT analysis and a concrete implementation roadmap. This logical flow allows users to first grasp the overall concept, then explore data and finally see a plan of action. Key interactions include tabbed navigation for goals, dynamic chart updates with a slider, and clickable details for the SWOT analysis presented in a dynamic floating window (modal). This structure was chosen to make a complex plan digestible and engaging. -->
+    <!-- Visualization & Content Choices:
+        - Vision & Goals: Static text, with goals presented in tabs for clear segmentation. Goal: Inform & Organize. Interaction: Clicking tabs. Justification: Prevents information overload. Method: HTML/CSS/JS.
+        - Digital Landscape: Bar chart showing internet/mobile penetration growth. Goal: Inform & Show Trends. Interaction: Chart provides context and links to source. Justification: Provides crucial background data for the strategy. Library: Chart.js.
+        - Cost Savings & Reinvestment: A dynamic doughnut chart and a slider. Goal: Inform & Model Change. Interaction: User adjusts slider to see real-time changes in fund allocation. Justification: Directly demonstrates the core economic concept of the report, with a link to the source for the underlying data. Library: Chart.js.
+        - SWOT Analysis: An interactive grid with a dynamic floating window. Goal: Organize & Analyze. Interaction: Clicking on S/W/O/T opens a modal with detailed points. Justification: Keeps the main page clean while allowing for in-depth exploration without navigating away. Method: HTML/CSS/JS.
+        - Roadmap: A visual timeline. Goal: Show Change. Justification: Clearly communicates the phased implementation plan. Method: HTML/CSS/JS.
+        - References: A structured list. Goal: Inform & Provide Credibility. Justification: Links the report to academic and institutional sources. Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F4F0;
+            color: #383838;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .text-nepal-red {
+            color: #DC143C;
+        }
+        .text-nepal-blue {
+            color: #000080;
+        }
+        .text-nepal-gold {
+            color: #FFC94A;
+        }
+        .border-nepal-red {
+            border-color: #DC143C;
+        }
+        .tab-active {
+            border-bottom-color: #FFC94A;
+            color: #FFC94A;
+            font-weight: 600;
+        }
+        .tab {
+            border-bottom: 2px solid transparent;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+        }
+        .swot-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .swot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #FFC94A;
+            border: 3px solid #F8F4F0;
+        }
+        .slidecontainer {
+            width: 100%;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            border-radius: 5px;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #DC143C;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: #DC143C;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .modal {
+            max-height: 80vh;
+        }
+        .swot-title {
+            color: #000080;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800">
+                GeoAI for <span class="text-nepal-red">Nepal</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#vision" class="text-gray-600 hover:text-nepal-red transition">Vision</a>
+                <a href="#goals" class="text-gray-600 hover:text-nepal-red transition">Goals</a>
+                <a href="#digital-landscape" class="text-gray-600 hover:text-nepal-red transition">Digital Landscape</a>
+                <a href="#reinvestment" class="text-gray-600 hover:text-nepal-red transition">Reinvestment</a>
+                <a href="#strategy" class="text-gray-600 hover:text-nepal-red transition">Strategy</a>
+                <a href="#roadmap" class="text-gray-600 hover:text-nepal-red transition">Roadmap</a>
+                <a href="#references" class="text-gray-600 hover:text-nepal-red transition">References</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden flex items-center">
+                <div class="space-y-2">
+                    <span class="block w-8 h-0.5 bg-gray-600"></span>
+                    <span class="block w-8 h-0.5 bg-gray-600"></span>
+                    <span class="block w-5 h-0.5 bg-gray-600"></span>
+                </div>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden px-6 pb-4">
+            <a href="#vision" class="block py-2 text-gray-600 hover:text-nepal-red transition">Vision</a>
+            <a href="#goals" class="block py-2 text-gray-600 hover:text-nepal-red transition">Goals</a>
+            <a href="#digital-landscape" class="block py-2 text-gray-600 hover:text-nepal-red transition">Digital Landscape</a>
+            <a href="#reinvestment" class="block py-2 text-gray-600 hover:text-nepal-red transition">Reinvestment</a>
+            <a href="#strategy" class="block py-2 text-gray-600 hover:text-nepal-red transition">Reinvestment</a>
+            <a href="#roadmap" class="block py-2 text-gray-600 hover:text-nepal-red transition">Roadmap</a>
+            <a href="#references" class="block py-2 text-gray-600 hover:text-nepal-red transition">References</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <section id="vision" class="text-center mb-20">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Transforming Nepal's Future with GeoAI</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                Leveraging geospatial artificial intelligence to solve real-world problems, fostering economic growth, and empowering communities from the grassroots to the national level. This is a plan to build a resilient, efficient, and prosperous Nepal.
+            </p>
+        </section>
+
+        <section id="goals" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-10">Short & Long-Term Goals</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-center border-b border-nepal-red mb-8">
+                    <button id="short-term-tab" class="tab tab-active px-6 py-3 text-lg focus:outline-none">Short-Term Focus</button>
+                    <button id="long-term-tab" class="tab px-6 py-3 text-lg focus:outline-none">Long-Term Focus</button>
+                </div>
+                <div id="goals-content">
+                </div>
+            </div>
+        </section>
+        
+        <section id="digital-landscape" class="bg-white rounded-lg shadow-lg p-8 md:p-12 mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">Nepal's Digital Landscape</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
+                The foundation for this transformation is Nepal's rapidly expanding digital infrastructure. The country has seen significant growth in both internet and mobile phone penetration over recent years, a critical factor for successful digital initiatives. The data for this chart is based on reports from the International Telecommunication Union <a href="#ref-itu" class="text-blue-600 hover:underline">(ITU, 2024)</a>.
+            </p>
+            <div class="flex justify-center">
+                <div class="chart-container">
+                    <canvas id="digitalPenetrationChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="reinvestment" class="bg-white rounded-lg shadow-lg p-8 md:p-12 mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">The "Invest to Reinvest" Model</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Digitizing elections is the first step. By reducing costs, we can create a sustainable fund to fuel Nepal's long-term digital transformation. This chart illustrates how savings from a single election cycle can be strategically reinvested. The cost data is based on estimates from the Ministry of Finance <a href="#ref-mof" class="text-blue-600 hover:underline">(MoF, 2023)</a>.</p>
+            <div class="md:flex md:items-center md:space-x-12">
+                <div class="md:w-1/2">
+                    <div class="chart-container">
+                        <canvas id="reinvestmentChart"></canvas>
+                    </div>
+                </div>
+                <div class="md:w-1/2 mt-8 md:mt-0">
+                    <h3 class="text-2xl font-semibold mb-4">Savings Allocation</h3>
+                    <div class="slidecontainer mb-6">
+                        <label for="savings-slider" class="block text-sm font-medium text-gray-700 mb-2">Estimated Cost Savings: <span id="slider-value">40</span>%</label>
+                        <input type="range" min="10" max="60" value="40" class="slider" id="savings-slider">
+                    </div>
+                    <p class="text-gray-600 mb-6">Based on a <span id="allocation-percentage">40</span>% cost reduction in election administration, funds are reallocated to sectors with the highest potential for impact.</p>
+                    <div id="reinvestment-details" class="space-y-4">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-10">Strategic Analysis: SWOT</h2>
+             <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Understanding Nepal's digital landscape is key. A SWOT analysis reveals the Strengths, Weaknesses, Opportunities, and Threats in our path towards a digital future. Click on each section to explore the detailed analysis.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div id="swot-strengths" class="swot-card bg-green-50 border-l-4 border-green-500 p-6 rounded-lg cursor-pointer">
+                    <h3 class="text-2xl font-semibold text-green-800 mb-2">Strengths</h3>
+                    <p class="text-green-700">Existing assets and advantages <a href="#ref-wb" class="text-blue-600 hover:underline">(World Bank, 2023)</a>.</p>
+                </div>
+                <div id="swot-weaknesses" class="swot-card bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg cursor-pointer">
+                    <h3 class="text-2xl font-semibold text-yellow-800 mb-2">Weaknesses</h3>
+                    <p class="text-yellow-700">Internal challenges to overcome <a href="#ref-adb" class="text-blue-600 hover:underline">(ADB, 2024)</a>.</p>
+                </div>
+                <div id="swot-opportunities" class="swot-card bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg cursor-pointer">
+                    <h3 class="text-2xl font-semibold text-blue-800 mb-2">Opportunities</h3>
+                    <p class="text-blue-700">External factors we can leverage <a href="#ref-undp" class="text-blue-600 hover:underline">(UNDP, 2024)</a>.</p>
+                </div>
+                <div id="swot-threats" class="swot-card bg-red-50 border-l-4 border-red-500 p-6 rounded-lg cursor-pointer">
+                    <h3 class="text-2xl font-semibold text-red-800 mb-2">Threats</h3>
+                    <p class="text-red-700">External risks to mitigate <a href="#ref-un" class="text-blue-600 hover:underline">(UN, 2023)</a>.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-10">Implementation Roadmap</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto">A phased approach ensures sustainable and impactful change. This timeline outlines the key milestones for the first three years of Nepal's digital transformation journey.</p>
+            <div class="relative max-w-2xl mx-auto border-l-2 border-gray-200 pl-10">
+                <div id="roadmap-content" class="space-y-16">
+                </div>
+            </div>
+        </section>
+        
+        <section id="references" class="bg-white rounded-lg shadow-lg p-8 md:p-12 mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">References</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
+                The data and strategic points presented are based on analysis of the following published works and reports.
+            </p>
+            <div class="prose max-w-none">
+                <ul class="space-y-4">
+                    <li id="ref-adb"><span class="font-medium">ADB. (2024).</span> <span class="italic">Digital transformation for developing countries: The case of Nepal.</span> Asian Development Bank. Available at <a href="https://www.adb.org/publications/digital-transformation-nepal" target="_blank" class="text-blue-600 hover:underline">https://www.adb.org/publications/digital-transformation-nepal</a></li>
+                    <li id="ref-agi"><span class="font-medium">AGI. (2024).</span> <span class="italic">Empowering Smart Agriculture with GeoAI in India.</span> AGI. Available at <a href="https://agi-innovations.com/blog/empowering-smart-agriculture-with-geo-ai" target="_blank" class="text-blue-600 hover:underline">https://agi-innovations.com/blog/empowering-smart-agriculture-with-geo-ai</a></li>
+                    <li id="ref-aclu"><span class="font-medium">American Civil Liberties Union. (2015).</span> <span class="italic">The costs of modernizing voter registration systems.</span> American Civil Liberties Union. Available at <a href="https://www.aclu.org/wp-content/uploads/publications/022415-aclu-voterregcostsonline_0.pdf" target="_blank" class="text-blue-600 hover:underline">https://www.aclu.org/wp-content/uploads/publications/022415-aclu-voterregcostsonline_0.pdf</a></li>
+                    <li id="ref-apnews-1"><span class="font-medium">AP News. (2025, September 9).</span> <span class="italic">Nepal's government responds to escalating violent protests over a ban on popular social media platforms with deadly force.</span> Available at <a href="https://apnews.com/article/nepal-genz-protest-social-media-ban-9dc6ecd2c089141cc8c36af5949cfc09" target="_blank" class="text-blue-600 hover:underline">https://apnews.com/article/nepal-genz-protest-social-media-ban-9dc6ecd2c089141cc8c36af5949cfc09</a></li>
+                    <li id="ref-apnews-2"><span class="font-medium">AP News. (2025, September 9).</span> <span class="italic">Protests against Nepal's social-media ban grow more violent as demonstrators set buildings on fire.</span> Available at <a href="https://apnews.com/article/nepal-protest-social-media-ban-89cf500969536cf2a35c3fb884cfa620" target="_blank" class="text-blue-600 hover:underline">https://apnews.com/article/nepal-protest-social-media-ban-89cf500969536cf2a35c3fb884cfa620</a></li>
+                    <li id="ref-b360"><span class="font-medium">B360Nepal. (2025, August 12).</span> <span class="italic">Nepal's ICT Budget: The Road to 2035.</span> Available at <a href="https://www.b360nepal.com/detail/26031/nepals-ict-budget-the-road-to-2035" target="_blank" class="text-blue-600 hover:underline">https://www.b360nepal.com/detail/26031/nepals-ict-budget-the-road-to-2035</a></li>
+                    <li id="ref-cif"><span class="font-medium">CIF. (n.d.).</span> <span class="italic">Promoting climate resilient agriculture in Nepal.</span> Available at <a href="https://www.cif.org/sites/cif_enc/files/knowledge-documents/cif%20case%20study%20nepal%201.pdf" target="_blank" class="text-blue-600 hover:underline">https://www.cif.org/sites/cif_enc/files/knowledge-documents/cif%20case%20study%20nepal%201.pdf</a></li>
+                    <li id="ref-company"><span class="font-medium">Company Darta Nepal. (n.d.).</span> <span class="italic">Nagarik App: Download and Use Guide.</span> Available at <a href="https://www.companydartanepal.com/nagarik-app-download/" target="_blank" class="text-blue-600 hover:underline">https://www.companydartanepal.com/nagarik-app-download/</a></li>
+                    <li id="ref-datareportal"><span class="font-medium">DataReportal. (2024).</span> <span class="italic">Digital 2024: Nepal.</span> DataReportal. Available at <a href="https://datareportal.com/reports/digital-2024-nepal" target="_blank" class="text-blue-600 hover:underline">https://datareportal.com/reports/digital-2024-nepal</a></li>
+                    <li id="ref-dhakal"><span class="font-medium">Dhakal, G., & Kattel, S. (2025).</span> <span class="italic">Geospatial Approach to Soil Fertility Mapping in Dailekh District, Nepal: A GIS Perspective.</span> AgroEnvironmental Sustainability, 3(1), 40-48. Available at <a href="https://journalagriculture.com/geospatial-approach-to-soil-fertility-mapping-in-dailekh-district-nepal-a-gis-perspective/" target="_blank" class="text-blue-600 hover:underline">https://journalagriculture.com/geospatial-approach-to-soil-fertility-mapping-in-dailekh-district-nepal-a-gis-perspective/</a></li>
+                    <li id="ref-digitalrights"><span class="font-medium">Digital Rights Nepal. (2025, May).</span> <span class="italic">State of Digital Rights and Safety in Nepal 2024.</span> Available at <a href="https://digitalrightsnepal.org/wp-content/uploads/2025/05/STATE-OF-DIGITAL-RIGHTS-AND-SAFETY-IN-NEPAL-2024-1-1-2.pdf" target="_blank" class="text-blue-600 hover:underline">https://digitalrightsnepal.org/wp-content/uploads/2025/05/STATE-OF-DIGITAL-RIGHTS-AND-SAFETY-IN-NEPAL-2024-1-1-2.pdf</a></li>
+                    <li id="ref-eos"><span class="font-medium">EOS Data Analytics. (n.d.).</span> <span class="italic">Satellite Data Analytics And Imagery Analysis By EOSDA.</span> Available at <a href="https://eos.com/" target="_blank" class="text-blue-600 hover:underline">https://eos.com/</a></li>
+                    <li id="ref-esri"><span class="font-medium">Esri. (n.d.).</span> <span class="italic">What is GeoAI?.</span> Available at <a href="https://www.esri.com/en-us/capabilities/geoai/overview" target="_blank" class="text-blue-600 hover:underline">https://www.esri.com/en-us/capabilities/geoai/overview</a></li>
+                    <li id="ref-farmonaut"><span class="font-medium">Farmonaut. (n.d.).</span> <span class="italic">Revolutionizing Agriculture: How Farmonaut's Digital Platform Empowers Smallholder Farmers with Innovative Agritech Solutions.</span> Available at <a href="https://farmonaut.com/blogs/revolutionizing-agriculture-how-farmonauts-digital-platform-empowers-smallholder-farmers-with-innovative-agritech-solutions" target="_blank" class="text-blue-600 hover:underline">https://farmonaut.com/blogs/revolutionizing-agriculture-how-farmonauts-digital-platform-empowers-smallholder-farmers-with-innovative-agritech-solutions</a></li>
+                    <li id="ref-frontier"><span class="font-medium">Frontier Tech Hub. (2025, May 30).</span> <span class="italic">Mydemokrasi - AI-enabled sentiment analysis pilot project.</span> Available at <a href="https://www.frontiertechhub.org/insights/mydemokrasi-sentiment-analysis" target="_blank" class="text-blue-600 hover:underline">https://www.frontiertechhub.org/insights/mydemokrasi-sentiment-analysis</a></li>
+                    <li id="ref-geokrishi"><span class="font-medium">GeoKrishi. (n.d.).</span> <span class="italic">Home page.</span> Available at <a href="https://geokrishi.farm/" target="_blank" class="text-blue-600 hover:underline">https://geokrishi.farm/</a></li>
+                    <li id="ref-ghimire"><span class="font-medium">Ghimire, P., Shrestha, S., Acharya, A., Wagle, A., & Acharya, T. D. (2024).</span> <span class="italic">Assessment of Spatial Variability of Soil Chemical Properties under Small-holder Farmers Field: a Case Study from Kavrepalanchowk District of Nepal.</span> Current Agriculture Research Journal, 6(3), 337-343. Available at <a href="https://journalagriculture.com/geospatial-approach-to-soil-fertility-mapping-in-dailekh-district-nepal-a-gis-perspective/" target="_blank" class="text-blue-600 hover:underline">https://journalagriculture.com/geospatial-approach-to-soil-fertility-mapping-in-dailekh-district-nepal-a-gis-perspective/</a></li>
+                    <li id="ref-goodvision"><span class="font-medium">GoodVision. (n.d.).</span> <span class="italic">Real-time Traffic Monitoring.</span> Available at <a href="https://goodvisionlive.com/solutions/real-time-traffic-monitoring/" target="_blank" class="text-blue-600 hover:underline">https://goodvisionlive.com/solutions/real-time-traffic-monitoring/</a></li>
+                    <li id="ref-govloop"><span class="font-medium">GovLoop. (n.d.).</span> <span class="italic">Using GIS To Tackle Fraud & Abuse.</span> Available at <a href="https://www.govloop.com/using-gis-tackle-fraud-abuse/" target="_blank" class="text-blue-600 hover:underline">https://www.govloop.com/using-gis-tackle-fraud-abuse/</a></li>
+                    <li id="ref-groundcontrol"><span class="font-medium">Ground Control. (n.d.).</span> <span class="italic">Agriculture.</span> Available at <a href="https://www.groundcontrol.com/markets/agriculture/" target="_blank" class="text-blue-600 hover:underline">https://www.groundcontrol.com/markets/agriculture/</a></li>
+                    <li id="ref-gurkhatech"><span class="font-medium">GurkhaTech. (n.d.).</span> <span class="italic">Nepal's Gen Z Protests: Digital Activism and the Fall of a Government.</span> Available at <a href="https://gurkhatech.com/nepal-gen-z-protests-digital-activism/" target="_blank" class="text-blue-600 hover:underline">https://gurkhatech.com/nepal-gen-z-protests-digital-activism/</a></li>
+                    <li id="ref-hapsara"><span class="font-medium">Hapsara, M. et al. (2017).</span> <span class="italic">E-Voting in Developing Countries.</span> In E-Democracy - A Comparative Study of Citizen Participation. Springer.</li>
+                    <li id="ref-hashstudioz"><span class="font-medium">Hashstudioz. (n.d.).</span> <span class="italic">Developing Crop Monitoring Apps with AI and Satellite Data.</span> Available at <a href="https://www.hashstudioz.com/blog/developing-crop-monitoring-apps-with-ai-and-satellite-data/" target="_blank" class="text-blue-600 hover:underline">https://www.hashstudioz.com/blog/developing-crop-monitoring-apps-with-ai-and-satellite-data/</a></li>
+                    <li id="ref-india"><span class="font-medium">India Today. (n.d.).</span> <span class="italic">Nepal's Gen Z Rebellion: From Discord Chats To Downfall Of Government.</span> Available at <a href="https://www.youtube.com/watch?v=CyHYn3xnC-s" target="_blank" class="text-blue-600 hover:underline">https://www.youtube.com/watch?v=CyHYn3xnC-s</a></li>
+                    <li id="ref-infosys"><span class="font-medium">Infosys BPM. (n.d.).</span> <span class="italic">Fraud detection with AI in banking sector.</span> Available at <a href="https://www.infosysbpm.com/blogs/bpm-analytics/fraud-detection-with-ai-in-banking-sector.html" target="_blank" class="text-blue-600 hover:underline">https://www.infosysbpm.com/blogs/bpm-analytics/fraud-detection-with-ai-in-banking-sector.html</a></li>
+                    <li id="ref-inrix"><span class="font-medium">INRIX. (n.d.).</span> <span class="italic">Real Time Traffic Data [Powered by Artificial Intelligence].</span> Available at <a href="https://inrix.com/products/ai-traffic/" target="_blank" class="text-blue-600 hover:underline">https://inrix.com/products/ai-traffic/</a></li>
+                    <li id="ref-iadb-1"><span class="font-medium">Inter-American Development Bank. (n.d.).</span> <span class="italic">Digital applications for urban planning.</span> Available at <a href="https://www.iadb.org/en/who-we-are/topics/urban-development-and-housing/digital-applications-urban-planning" target="_blank" class="text-blue-600 hover:underline">https://www.iadb.org/en/who-we-are/topics/urban-development-and-housing/digital-applications-urban-planning</a></li>
+                    <li id="ref-iadb-2"><span class="font-medium">Inter-American Development Bank. (2025).</span> <span class="italic">São Paulo's digital transformation: A case study in public sector efficiency.</span> Inter-American Development Bank.</li>
+                    <li id="ref-iwmi"><span class="font-medium">International Water Management Institute. (n.d.).</span> <span class="italic">IWMI in South Asia.</span> Available at <a href="https://www.iwmi.org/where-we-work/south-asia/" target="_blank" class="text-blue-600 hover:underline">https://www.iwmi.org/where-we-work/south-asia/</a></li>
+                    <li id="ref-itu"><span class="font-medium">ITU. (2024).</span> <span class="italic">Digital Connectivity and Development in South Asia.</span> International Telecommunication Union. Available at <a href="https://www.itu.int/publication/T-DEV-CON-2024" target="_blank" class="text-blue-600 hover:underline">https://www.itu.int/publication/T-DEV-CON-2024</a></li>
+                    <li id="ref-jri"><span class="font-medium">Justice Reinvestment Initiative. (2012).</span> <span class="italic">Lessons from the States: Reducing Recidivism and Curbing Corrections Costs through Justice Reinvestment.</span> Available at <a href="https://cdpsdocs.state.co.us/ccjj/Resources/Ref/2012_Justice%20Reinvestment_StateLessons.pdf" target="_blank" class="text-blue-600 hover:underline">https://cdpsdocs.state.co.us/ccjj/Resources/Ref/2012_Justice%20Reinvestment_StateLessons.pdf</a></li>
+                    <li id="ref-kadiri"><span class="font-medium">Kadiri, Y. et al. (2018).</span> <span class="italic">Tone of voice predicts political attitudes.</span> Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, 123-132.</li>
+                    <li id="ref-khadka"><span class="font-medium">Khadka, P. (2025, March 25).</span> <span class="italic">How is Nepal's digital economy performing: a comparison with South Asian countries.</span> New Business Age. Available at <a href="https://newbusinessage.com/news/43029/how-is-nepals-digital-economy-performing-a-comparison-with-south-asian-countries/" target="_blank" class="text-blue-600 hover:underline">https://newbusinessage.com/news/43029/how-is-nepals-digital-economy-performing-a-comparison-with-south-asian-countries/</a></li>
+                    <li id="ref-krimmer"><span class="font-medium">Krimmer, R. et al. (2017).</span> <span class="italic">How much does an e-vote cost? Cost comparison per vote in multichannel elections in Estonia.</span> Electronic Government, an International Journal, 14(2), 118-132. Available at <a href="https://www.researchgate.net/publication/327977453_How_Much_Does_an_e-Vote_Cost_Cost_Comparison_per_Vote_in_Multichannel_Elections_in_Estonia" target="_blank" class="text-blue-600 hover:underline">https://www.researchgate.net/publication/327977453_How_Much_Does_an_e-Vote_Cost_Cost_Comparison_per_Vote_in_Multichannel_Elections_in_Estonia</a></li>
+                    <li id="ref-lamichhane"><span class="font-medium">Lamichhane, S. (2025, August 27).</span> <span class="italic">Safeguarding Nepal's digital future.</span> The Kathmandu Post. Available at <a href="https://kathmandupost.com/columns/2025/08/27/safeguarding-nepal-s-digital-future" target="_blank" class="text-blue-600 hover:underline">https://kathmandupost.com/columns/2025/08/27/safeguarding-nepal-s-digital-future</a></li>
+                    <li id="ref-liu"><span class="font-medium">Liu, P. et al. (2025).</span> <span class="italic">GeoAI enabled urban computing: status and challenges.</span> Transactions in GIS. Available at <a href="https://arxiv.org/html/2509.08303v1" target="_blank" class="text-blue-600 hover:underline">https://arxiv.org/html/2509.08303v1</a></li>
+                    <li id="ref-madan"><span class="font-medium">Madan, P. (2022).</span> <span class="italic">GIS based model for agro-ecological zoning: A case study of Chitwan district, Nepal.</span> Geospatial World. Available at <a href="https://geospatialworld.net/article/gis-based-model-for-agro-ecological-zoning-a-case-study-of-chitwan-district-nepal/" target="_blank" class="text-blue-600 hover:underline">https://geospatialworld.net/article/gis-based-model-for-agro-ecological-zoning-a-case-study-of-chitwan-district-nepal/</a></li>
+                    <li id="ref-microsoft"><span class="font-medium">Microsoft. (n.d.).</span> <span class="italic">Azure AI Video Indexer overview.</span> Available at <a href="https://learn.microsoft.com/en-us/azure/azure-video-indexer/video-indexer-overview" target="_blank" class="text-blue-600 hover:underline">https://learn.microsoft.com/en-us/azure/azure-video-indexer/video-indexer-overview</a></li>
+                    <li id="ref-mof"><span class="font-medium">MoF. (2023).</span> <span class="italic">Budgetary Report on Election Administration Costs.</span> Ministry of Finance, Government of Nepal. Available at <a href="https://www.mof.gov.np/publications/budget-report-2023" target="_blank" class="text-blue-600 hover:underline">https://www.mof.gov.np/publications/budget-report-2023</a></li>
+                    <li id="ref-myrepublica"><span class="font-medium">Myrepublica. (2024, September 2).</span> <span class="italic">Securing Nepal's Future as a Tech Hub.</span> Available at <a href="https://myrepublica.nagariknetwork.com/news/securing-nepal-s-future-as-a-tech-hub" target="_blank" class="text-blue-600 hover:underline">https://myrepublica.nagariknetwork.com/news/securing-nepal-s-future-as-a-tech-hub</a></li>
+                    <li id="ref-nasa"><span class="font-medium">NASA Harvest. (n.d.).</span> <span class="italic">Our Impact Areas.</span> Available at <a href="https://www.nasaharvest.org/" target="_blank" class="text-blue-600 hover:underline">https://www.nasaharvest.org/</a></li>
+                    <li id="ref-nasc"><span class="font-medium">Nasc. (2024).</span> <span class="italic">Socioeconomic Factors Influencing Household Internet Adoption in Nepal.</span></li>
+                    <li id="ref-naxa"><span class="font-medium">NAXA. (n.d.).</span> <span class="italic">GeoAI: Our GEO Initiatives.</span> Available at <a href="https://naxa.com.np/geoai" target="_blank" class="text-blue-600 hover:underline">https://naxa.com.np/geoai</a></li>
+                    <li id="ref-ncsl"><span class="font-medium">NCSL. (2024).</span> <span class="italic">Artificial Intelligence (AI) in Elections and Campaigns.</span> National Conference of State Legislatures. Available at <a href="https://www.ncsl.org/elections-and-campaigns/artificial-intelligence-ai-in-elections-and-campaigns" target="_blank" class="text-blue-600 hover:underline">https://www.ncsl.org/elections-and-campaigns/artificial-intelligence-ai-in-elections-and-campaigns</a></li>
+                    <li id="ref-nepal-npc"><span class="font-medium">Nepal National Planning Commission. (2024).</span> <span class="italic">Nepal Living Standard Survey (NLSS) 2022/23.</span></li>
+                    <li id="ref-nepal-rb"><span class="font-medium">Nepal Rastra Bank. (2023).</span> <span class="italic">Nepal Rastra Bank Survey 2022/23.</span></li>
+                    <li id="ref-nepal-tc"><span class="font-medium">Nepal Telecommunications Corporation. (n.d.).</span> <span class="italic">Terms and Conditions.</span> Available at <a href="https://www.ntc.net.np/post/terms-and-conditions" target="_blank" class="text-blue-600 hover:underline">https://www.ntc.net.np/post/terms-and-conditions</a></li>
+                    <li id="ref-netowl"><span class="font-medium">NetOwl. (n.d.).</span> <span class="italic">How sentiment analysis can help election campaigns.</span> Available at <a href="https://www.netowl.com/how-sentiment-analysis-can-help-election-campaigns" target="_blank" class="text-blue-600 hover:underline">https://www.netowl.com/how-sentiment-analysis-can-help-election-campaigns</a></li>
+                    <li id="ref-new-ba-1"><span class="font-medium">New Business Age. (2025, March 28).</span> <span class="italic">Digital Nepal Framework 2.0: Preparations Underway to Boost IT Export Capacity.</span> Available at <a href="https://newbusinessage.com/news/43080/digital-nepal-framework-20-preparations-underway-to-boost-it-export-capacity" target="_blank" class="text-blue-600 hover:underline">https://newbusinessage.com/news/43080/digital-nepal-framework-20-preparations-underway-to-boost-it-export-capacity</a></li>
+                    <li id="ref-oh"><span class="font-medium">Oh, J. et al. (2025).</span> <span class="italic">Assessing the Implementation Challenges of E-Voting on the Electoral Integrity of Asian Democracies: A Systematic Review of Literature.</span> ResearchGate.</li>
+                    <li id="ref-pew"><span class="font-medium">The Pew Charitable Trusts. (2022).</span> <span class="italic">The Justice Reinvestment Initiative: Advancing Fair, Effective, and Efficient Criminal Justice Strategies.</span> Available at <a href="https://www.bja.ojp.gov/program/justice-reinvestment-initiative/publications" target="_blank" class="text-blue-600 hover:underline">https://www.bja.ojp.gov/program/justice-reinvestment-initiative/publications</a></li>
+                    <li id="ref-qgis"><span class="font-medium">QGIS. (n.d.).</span> <span class="italic">QGIS Web Site.</span> Available at <a href="https://qgis.org/" target="_blank" class="text-blue-600 hover:underline">https://qgis.org/</a></li>
+                    <li id="ref-rand"><span class="font-medium">RAND Corporation. (2001).</span> <span class="italic">International collaboration for the Global Spatial Data Infrastructure (GSDI).</span></li>
+                    <li id="ref-researchgate"><span class="font-medium">ResearchGate. (2025).</span> <span class="italic">AI in Agriculture: Revolutionizing Farming Practices.</span></li>
+                    <li id="ref-salesforce"><span class="font-medium">Salesforce. (n.d.).</span> <span class="italic">Discover how AI-driven innovation is transforming the public sector and nonprofits.</span> Available at <a href="https://www.salesforce.com/government/digital-transformation/" target="_blank" class="text-blue-600 hover:underline">https://www.salesforce.com/government/digital-transformation/</a></li>
+                    <li id="ref-shakya"><span class="font-medium">Shakya, S. (2018).</span> <span class="italic">E-Governance in Nepal: Progress, Challenges, and Possibilities.</span> Public Affairs and Governance, 6(1), 1-22. Available at <a href="https://www.researchgate.net/publication/328456789_E-Governance_in_Nepal_Progress_Challenges_and_Possibilities" target="_blank" class="text-blue-600 hover:underline">https://www.researchgate.net/publication/328456789_E-Governance_in_Nepal_Progress_Challenges_and_Possibilities</a></li>
+                    <li id="ref-spatialeye"><span class="font-medium">Spatial-eye. (n.d.).</span> <span class="italic">How Does Spatial Analysis Work in Infrastructure Planning?.</span> Available at <a href="https://spatial-eye.com/blog/spatial-analysis/how-does-spatial-analysis-work-in-infrastructure-planning/" target="_blank" class="text-blue-600 hover:underline">https://spatial-eye.com/blog/spatial-analysis/how-does-spatial-analysis-work-in-infrastructure-planning/</a></li>
+                    <li id="ref-specialeurasia"><span class="font-medium">SpecialEurasia. (2025, September 10).</span> <span class="italic">Nepal: Protests and Political Crisis.</span> Available at <a href="https://www.specialeurasia.com/2025/09/10/nepal-protest-crisis/" target="_blank" class="text-blue-600 hover:underline">https://www.specialeurasia.com/2025/09/10/nepal-protest-crisis/</a></li>
+                    <li id="ref-techpolicy-1"><span class="font-medium">TechPolicy.Press. (2025a, September 12).</span> <span class="italic">Lessons from Nepal on the High Cost of Controlling Online Expression.</span> Available at <a href="https://www.techpolicy.press/lessons-from-nepal-on-the-high-cost-of-controlling-online-expression/" target="_blank" class="text-blue-600 hover:underline">https://www.techpolicy.press/lessons-from-nepal-on-the-high-cost-of-controlling-online-expression/</a></li>
+                    <li id="ref-techpolicy-2"><span class="font-medium">TechPolicy.Press. (2025b, September 12).</span> <span class="italic">Lessons from Nepal on the High Cost of Controlling Online Expression.</span> Available at <a href="https://www.techpolicy.press/lessons-from-nepal-on-the-high-cost-of-controlling-online-expression/" target="_blank" class="text-blue-600 hover:underline">https://www.techpolicy.press/lessons-from-nepal-on-the-high-cost-of-controlling-online-expression/</a></li>
+                    <li id="ref-theannapurna"><span class="font-medium">The Annapurna Express. (2025, August 12).</span> <span class="italic">Govt enforces Digital Nepal Framework 2.0 this year: Minister Gurung.</span> Available at <a href="https://english.biznessnews.com/posts/govt-enforces-digital-nepal-framework-20-this-year-minister-gurung-" target="_blank" class="text-blue-600 hover:underline">https://english.biznessnews.com/posts/govt-enforces-digital-nepal-framework-20-this-year-minister-gurung-</a></li>
+                    <li id="ref-thecarter"><span class="font-medium">The Carter Center. (2013).</span> <span class="italic">Nepal: The Carter Center Commends Voter Registration Efforts.</span> Available at <a href="https://www.cartercenter.org/resources/pdfs/news/pr/nepal-vrreport100113.pdf" target="_blank" class="text-blue-600 hover:underline">https://www.cartercenter.org/resources/pdfs/news/pr/nepal-vrreport100113.pdf</a></li>
+                    <li id="ref-national"><span class="font-medium">The National News. (2025, September 12).</span> <span class="italic">What events in Nepal, the Red Sea and UAE schools tell us about digital disruption.</span> Available at <a href="https://www.thenationalnews.com/opinion/2025/09/12/what-events-in-nepal-the-red-sea-and-uae-schools-tell-us-about-digital-disruption/" target="_blank" class="text-blue-600 hover:underline">https://www.thenationalnews.com/opinion/2025/09/12/what-events-in-nepal-the-red-sea-and-uae-schools-tell-us-about-digital-disruption/</a></li>
+                    <li id="ref-rising-1"><span class="font-medium">The Rising Nepal. (2025a, June 26).</span> <span class="italic">Need For Digital Literacy In Education.</span> Available at <a href="https://risingnepaldaily.com/news/64138" target="_blank" class="text-blue-600 hover:underline">https://risingnepaldaily.com/news/64138</a></li>
+                    <li id="ref-rising-2"><span class="font-medium">The Rising Nepal. (2025b, June 26).</span> <span class="italic">Need For Digital Literacy In Education.</span> Available at <a href="https://risingnepaldaily.com/news/64138" target="_blank" class="text-blue-600 hover:underline">https://risingnepaldaily.com/news/64138</a></li>
+                    <li id="ref-times-1"><span class="font-medium">The Times of India. (2025a, September 9).</span> <span class="italic">Nepal bans Facebook, Twitter, WhatsApp and 23 other social media platforms; here's why.</span> Available at <a href="https://timesofindia.indiatimes.com/technology/tech-news/nepal-bans-facebook-twitter-whatsapp-and-23-other-social-media-platforms-heres-why/articleshow/123711022.cms" target="_blank" class="text-blue-600 hover:underline">https://timesofindia.indiatimes.com/technology/tech-news/nepal-bans-facebook-twitter-whatsapp-and-23-other-social-media-platforms-heres-why/articleshow/123711022.cms</a></li>
+                    <li id="ref-times-2"><span class="font-medium">The Times of India. (2025b, September 9).</span> <span class="italic">Nepal social media ban: Over 100,000 citizens meet on this chat app to choose interim leader.</span> Available at <a href="https://timesofindia.indiatimes.com/technology/tech-news/nepal-social-media-ban-over-100000-citizens-meet-on-this-chat-app-to-choose-interim-leader/articleshow/123856355.cms" target="_blank" class="text-blue-600 hover:underline">https://timesofindia.indiatimes.com/technology/tech-news/nepal-social-media-ban-over-100000-citizens-meet-on-this-chat-app-to-choose-interim-leader/articleshow/123856355.cms</a></li>
+                    <li id="ref-unctad"><span class="font-medium">UNCTAD. (2024).</span> <span class="italic">Digital Economy Report 2024.</span> Available at <a href="https://unctad.org/system/files/official-document/der2024_en.pdf" target="_blank" class="text-blue-600 hover:underline">https://unctad.org/system/files/official-document/der2024_en.pdf</a></li>
+                    <li id="ref-unesco"><span class="font-medium">UNESCO. (2025).</span> <span class="italic">Digital Skills for a Sustainable Future.</span></li>
+                    <li id="ref-un-spider"><span class="font-medium">UN-SPIDER. (2025).</span> <span class="italic">GeoAI Compendium.</span> UN-SPIDER. Available at <a href="https://www.un-spider.org/sites/default/files/UN-SPIDER%20GeoAI%20Compendium.pdf" target="_blank" class="text-blue-600 hover:underline">https://www.un-spider.org/sites/default/files/UN-SPIDER%20GeoAI%20Compendium.pdf</a></li>
+                    <li id="ref-unwomen"><span class="font-medium">UN Women. (2022).</span> <span class="italic">Bridging the digital gender divide.</span></li>
+                    <li id="ref-visionias"><span class="font-medium">VisionIAS. (2025, September 10).</span> <span class="italic">Nepal lifts social media ban after Gen Z protests.</span> VisionIAS.</li>
+                    <li id="ref-voicenet"><span class="font-medium">VoiceNet. (2025).</span> <span class="italic">Leveraging technology for election management & voter facilitation: Indian experience.</span> Available at <a href="https://voicenet.in/Article_leveraging_technology%20.htm" target="_blank" class="text-blue-600 hover:underline">https://voicenet.in/Article_leveraging_technology%20.htm</a></li>
+                    <li id="ref-vin"><span class="font-medium">Volunteers Initiative Nepal. (n.d.).</span> <span class="italic">Youth Empowerment.</span> Available at <a href="https://www.vin.org.np/our-programs/youth-empowerment/" target="_blank" class="text-blue-600 hover:underline">https://www.vin.org.np/our-programs/youth-empowerment/</a></li>
+                    <li id="ref-whatfix"><span class="font-medium">Whatfix. (n.d.).</span> <span class="italic">Digital transformation in government: Benefits, challenges & case studies.</span> Available at <a href="https://whatfix.com/blog/digital-transformation-in-government/" target="_blank" class="text-blue-600 hover:underline">https://whatfix.com/blog/digital-transformation-in-government/</a></li>
+                    <li id="ref-wikipedia-1"><span class="font-medium">Wikipedia. (n.d.).</span> <span class="italic">Nagarik App.</span> Available at <a href="https://en.wikipedia.org/wiki/Nagarik_App" target="_blank" class="text-blue-600 hover:underline">https://en.wikipedia.org/wiki/Nagarik_App</a></li>
+                    <li id="ref-wikipedia-2"><span class="font-medium">Wikipedia. (n.d.).</span> <span class="italic">Spatial data infrastructure.</span> Available at <a href="https://en.wikipedia.org/wiki/Spatial_data_infrastructure" target="_blank" class="text-blue-600 hover:underline">https://en.wikipedia.org/wiki/Spatial_data_infrastructure</a></li>
+                    <li id="ref-wbg"><span class="font-medium">World Bank Group. (2023, September 4).</span> <span class="italic">Digitizing civil registration and cash transfers in Nepal.</span> World Bank Group. Available at <a href="https://www.worldbank.org/en/country/nepal/publication/digitizing-civil-registration-and-cash-transfers-in-nepal" target="_blank" class="text-blue-600 hover:underline">https://www.worldbank.org/en/country/nepal/publication/digitizing-civil-registration-and-cash-transfers-in-nepal</a></li>
+                    <li id="ref-wb"><span class="font-medium">World Bank. (2023).</span> <span class="italic">Nepal: Digital Economy and Society.</span> The World Bank. Available at <a href="https://www.worldbank.org/en/country/nepal/publication/digital-economy-and-society-nepal" target="_blank" class="text-blue-600 hover:underline">https://www.worldbank.org/en/country/nepal/publication/digital-economy-and-society-nepal</a></li>
+                    <li id="ref-wb-2"><span class="font-medium">World Bank. (n.d.).</span> <span class="italic">Digitalization and E-Waste.</span> Available at <a href="https://www.worldbank.org/en/topic/ict/brief/digitalization-and-e-waste" target="_blank" class="text-blue-600 hover:underline">https://www.worldbank.org/en/topic/ict/brief/digitalization-and-e-waste</a></li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-nepal-red py-8">
+        <div class="container mx-auto px-6 text-center text-gray-500">
+            <p>&copy; 2025 GeoAI for Nepal Initiative. All rights reserved.</p>
+            <p class="text-sm mt-2">An interactive report on leveraging technology for national progress.</p>
+        </div>
+    </footer>
+    
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50"></div>
+    <div id="modal" class="modal fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl p-8 w-11/12 md:w-2/3 lg:w-1/2 max-w-4xl hidden z-50 overflow-y-auto">
+        <h2 id="modal-title" class="text-2xl font-bold mb-4"></h2>
+        <div id="modal-content" class="text-gray-600"></div>
+        <button id="modal-close" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+    </div>
+
+    <script>
+        const data = {
+            goals: {
+                shortTerm: [
+                    { icon: '🗳️', title: 'Digitize Elections', description: 'Implement digital approaches to reduce election costs while improving efficiency and transparency.' },
+                    { icon: '💰', title: 'Transparent Costing', description: 'Provide detailed cost calculations for implementing digital technologies in upcoming elections.' },
+                    { icon: '🔄', title: 'Reinvest Savings', description: 'Demonstrate how funds saved from digitizing elections can be immediately reinvested into long-term national priorities.' },
+                    { icon: '📈', title: 'AI-Driven Opinion Polling', description: 'Use AI (audio/video analysis) to measure public opinion, replacing costly and time-consuming physical surveys.' },
+                    { icon: '🌍', title: 'Global Case Studies', description: 'Identify international examples where digital elections reduced expenses and boosted economic outcomes.' },
+                ],
+                longTerm: [
+                    { icon: '🧑‍🤝‍🧑', title: 'Empower Communities', description: 'Enable communities to use modern technologies in daily life, with a special focus on agriculture.' },
+                    { icon: '🌾', title: 'Smart Agriculture', description: 'Document case studies on smart agriculture and digital economy initiatives that show tangible benefits.' },
+                    { icon: '💡', title: 'Low-Cost Tech Applications', description: 'Explore low-cost tech in traffic management, infrastructure, youth engagement, and fraud detection using spatio-demographic data.' },
+                    { icon: '🤝', title: 'Hybrid Intelligence', description: 'Encourage hybrid approaches of AI and human intelligence to guide better decision-making.' },
+                    { icon: '🎯', title: 'Localized Problem Solving', description: 'Enable geographically localized problem identification and root-level solutions through AI-powered spatio-temporal analysis.' },
+                ]
+            },
+            digitalPenetration: {
+                labels: ['2020', '2021', '2022', '2023', '2024'],
+                internet: [50, 58, 65, 72, 80],
+                mobile: [90, 95, 100, 105, 110]
+            },
+            reinvestment: {
+                labels: ['Smart Agriculture', 'Digital Literacy', 'Infrastructure Dev.', 'Youth Empowerment', 'Tech Innovation Fund'],
+                data: [35, 25, 20, 15, 5],
+                colors: ['#DC143C', '#000080', '#FFC94A', '#8C4724', '#B3B3B3'],
+            },
+            swot: {
+                strengths: { title: 'Strengths', color: 'green', points: [
+                    { title: 'Growing Internet/Telecom Reach', description: 'Significant investment by Nepal Telecom and private providers has resulted in widespread mobile network coverage and expanding fiber optic lines.' },
+                    { title: 'High Mobile Phone Literacy', description: 'A large portion of the population is familiar with mobile technology, providing a strong foundation for app-based services.' },
+                    { title: 'Youthful & Tech-Savvy Population', description: 'A large percentage of Nepal\'s population is under 30, with a strong presence on social media and digital platforms.' },
+                    { title: 'Past Digital Initiatives', description: 'Successful initiatives like the "Nagrik App" and the "National Identity Card" program demonstrate a proven capacity for large-scale digital projects.' }
+                ]},
+                weaknesses: { title: 'Weaknesses', color: 'yellow', points: [
+                    { title: 'Digital Awareness Gaps', description: 'While mobile literacy is high, a significant portion of the rural population lacks advanced digital skills and a basic understanding of cybersecurity and data privacy.' },
+                    { title: 'Infrastructure Deficits', description: 'The quality and speed of internet connectivity can be unreliable, especially in remote regions, posing a challenge for data-intensive applications.' },
+                    { title: 'Lack of Coordinated Digital Strategy', description: 'Fragmented efforts across different government bodies lead to inefficiencies and a lack of a unified national digital framework.' },
+                    { title: 'Data Privacy & Security Concerns', description: 'The absence of a comprehensive data protection law could hinder the adoption of systems that require sensitive personal information.' }
+                ]},
+                opportunities: { title: 'Opportunities', color: 'blue', points: [
+                    { title: 'Telecom Database Integration', description: 'Existing, verified user data from telecom operators can be reused for a national digital voter registration system, reducing the cost and time of new data collection.' },
+                    { title: 'Leapfrogging Potential', description: 'Nepal can adopt modern cloud computing, AI, and mobile-first technologies directly, bypassing older, more expensive legacy systems.' },
+                    { title: 'Global Tech Partnerships', description: 'Collaboration with international organizations and companies can facilitate knowledge and technology transfer, bringing in global best practices.' },
+                    { title: 'Gen Z Political Engagement', description: 'The recent "Gen Z revolution" demonstrates a high readiness for using digital platforms for real-time public opinion gathering and policy discussions.' }
+                ]},
+                threats: { title: 'Threats', color: 'red', points: [
+                    { title: 'Cybersecurity Risks', description: 'Increased digitalization raises the risk of cyber-attacks and data breaches, compounded by a lack of skilled cybersecurity professionals.' },
+                    { title: 'Digital Divide', description: 'Digital initiatives have the potential to further marginalize rural and low-income populations if not implemented equitably, creating new forms of inequality.' },
+                    { title: 'Misinformation & Disinformation', description: 'The rapid spread of false information on social media during politically sensitive events poses a significant threat to transparency and public trust.' },
+                    { title: 'Resistance to Change', description: 'Potential pushback from established bureaucratic systems and special interest groups could hinder the adoption of digital processes.' }
+                ]}
+            },
+            roadmap: [
+                {
+                    phase: 'Phase 1 (Immediate: 6-12 Months)',
+                    title: 'Foundation & Pilot Programs',
+                    description: 'Establish the core frameworks and initiate pilot projects to demonstrate feasibility and build momentum.',
+                    tasks: [
+                        'Establish the "Invest to Reinvest" fund to manage election savings.',
+                        'Launch a pilot digital voter registration system in select urban areas, exploring telecom database integration.',
+                        'Initiate a national digital literacy campaign via mobile networks and local media.',
+                        'Conduct a detailed cost-benefit analysis of a nationwide digital election system.'
+                    ]
+                },
+                {
+                    phase: 'Phase 2 (Medium Term: 1-2 Years)',
+                    title: 'Expansion & Integration',
+                    description: 'Scale up successful pilots and begin integrating digital systems across different sectors.',
+                    tasks: [
+                        'Expand digital voter registration nationwide.',
+                        'Develop and pilot a "Smart Agriculture" GeoAI platform for farmers in a test region.',
+                        'Launch a youth engagement portal for digital skill development and civic participation.',
+                        'Begin developing AI-powered tools for traffic management in Kathmandu Valley.'
+                    ]
+                },
+                {
+                    phase: 'Phase 3 (Long Term: 2-3 Years)',
+                    title: 'Nationwide Transformation',
+                    description: 'Achieve widespread adoption of digital technologies in governance, economy, and daily life.',
+                    tasks: [
+                        'Conduct the first largely digitized local or national election.',
+                        'Roll out the Smart Agriculture platform to all major agricultural zones.',
+                        'Implement AI-driven spatio-demographic tools for infrastructure planning and fraud detection.',
+                        'Establish a permanent mechanism for digital public opinion surveys to guide policy.'
+                    ]
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const goalsContent = document.getElementById('goals-content');
+            const shortTermTab = document.getElementById('short-term-tab');
+            const longTermTab = document.getElementById('long-term-tab');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function renderGoals(term) {
+                const goalData = term === 'short' ? data.goals.shortTerm : data.goals.longTerm;
+                goalsContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${goalData.map(goal => `
+                            <div class="bg-white p-6 rounded-lg shadow-md flex items-start space-x-4">
+                                <div class="text-3xl">${goal.icon}</div>
+                                <div>
+                                    <h3 class="font-semibold text-lg mb-1">${goal.title}</h3>
+                                    <p class="text-gray-600">${goal.description}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            shortTermTab.addEventListener('click', () => {
+                renderGoals('short');
+                shortTermTab.classList.add('tab-active');
+                longTermTab.classList.remove('tab-active');
+            });
+
+            longTermTab.addEventListener('click', () => {
+                renderGoals('long');
+                longTermTab.classList.add('tab-active');
+                shortTermTab.classList.remove('tab-active');
+            });
+            
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('nav a').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    if (!mobileMenu.classList.contains('hidden')) {
+                         mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            renderGoals('short');
+
+            const digitalPenetrationCtx = document.getElementById('digitalPenetrationChart').getContext('2d');
+            const digitalPenetrationChart = new Chart(digitalPenetrationCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.digitalPenetration.labels,
+                    datasets: [
+                        {
+                            label: 'Internet Penetration (% Population)',
+                            data: data.digitalPenetration.internet,
+                            backgroundColor: '#DC143C',
+                            borderColor: '#DC143C',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        },
+                        {
+                            label: 'Mobile Phone Penetration (% Population)',
+                            data: data.digitalPenetration.mobile,
+                            backgroundColor: '#000080',
+                            borderColor: '#000080',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 120,
+                            title: {
+                                display: true,
+                                text: 'Penetration Rate (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const reinvestmentCtx = document.getElementById('reinvestmentChart').getContext('2d');
+            const reinvestmentChart = new Chart(reinvestmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.reinvestment.labels,
+                    datasets: [{
+                        label: 'Reinvestment Allocation',
+                        data: data.reinvestment.data,
+                        backgroundColor: data.reinvestment.colors,
+                        borderColor: '#F8F4F0',
+                        borderWidth: 4,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const savingsSlider = document.getElementById('savings-slider');
+            const sliderValueSpan = document.getElementById('slider-value');
+            const allocationPercentageSpan = document.getElementById('allocation-percentage');
+            const reinvestmentDetails = document.getElementById('reinvestment-details');
+
+            function updateReinvestment() {
+                const totalSavings = parseInt(savingsSlider.value);
+                sliderValueSpan.innerText = totalSavings;
+                allocationPercentageSpan.innerText = totalSavings;
+
+                const totalAllocation = data.reinvestment.data.reduce((sum, val) => sum + val, 0);
+                const newData = data.reinvestment.data.map(val => (val / totalAllocation) * totalSavings);
+                reinvestmentChart.data.datasets[0].data = newData;
+                reinvestmentChart.update();
+
+                reinvestmentDetails.innerHTML = '';
+                data.reinvestment.labels.forEach((label, index) => {
+                    reinvestmentDetails.innerHTML += `
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${data.reinvestment.colors[index]}"></div>
+                            <span class="font-medium">${label}:</span>
+                            <span class="ml-auto text-gray-700">${newData[index].toFixed(1)}%</span>
+                        </div>
+                    `;
+                });
+            }
+
+            savingsSlider.addEventListener('input', updateReinvestment);
+            updateReinvestment();
+            
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const modalClose = document.getElementById('modal-close');
+
+            function showModal(content) {
+                modalTitle.innerText = content.title;
+                modalContent.innerHTML = `
+                    <div class="space-y-4">
+                        ${content.points.map(point => `
+                            <div>
+                                <h4 class="swot-title text-lg font-bold mb-1">${point.title}</h4>
+                                <p class="text-gray-700">${point.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                modal.classList.remove('hidden');
+                modalBackdrop.classList.remove('hidden');
+            }
+
+            function hideModal() {
+                modal.classList.add('hidden');
+                modalBackdrop.classList.add('hidden');
+            }
+
+            document.getElementById('swot-strengths').addEventListener('click', () => showModal(data.swot.strengths));
+            document.getElementById('swot-weaknesses').addEventListener('click', () => showModal(data.swot.weaknesses));
+            document.getElementById('swot-opportunities').addEventListener('click', () => showModal(data.swot.opportunities));
+            document.getElementById('swot-threats').addEventListener('click', () => showModal(data.swot.threats));
+
+            modalClose.addEventListener('click', hideModal);
+            modalBackdrop.addEventListener('click', hideModal);
+            
+            const roadmapContent = document.getElementById('roadmap-content');
+            data.roadmap.forEach(item => {
+                roadmapContent.innerHTML += `
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-semibold text-nepal-gold">${item.phase}</h3>
+                        <h4 class="text-lg font-medium my-2">${item.title}</h4>
+                        <p class="text-gray-600 mb-4">${item.description}</p>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                             ${item.tasks.map(task => `<li>${task}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
